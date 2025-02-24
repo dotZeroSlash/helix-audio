@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 from unittest.mock import Mock, patch, PropertyMock
 from src.gui.voice_assistant_gui import VoiceAssistantGUI
 

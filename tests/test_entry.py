@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 from unittest.mock import patch
 import sys
 from entry import run_main

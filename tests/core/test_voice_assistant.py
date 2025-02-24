@@ -1,4 +1,4 @@
-import pytest
+import pytest # type: ignore
 from unittest.mock import Mock, patch, MagicMock
 from src.core.voice_assistant import VoiceAssistant
 from src.config.config import Config
