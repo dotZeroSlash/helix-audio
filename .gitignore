@@ -30,3 +30,8 @@ ENV/
 .idea/
 .vscode/
 *.swp
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
