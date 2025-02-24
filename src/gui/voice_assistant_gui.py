@@ -18,7 +18,22 @@ class VoiceAssistantGUI:
         self.root.title("Helix Helper")
         self.root.geometry("600x400")
         self.root.configure(bg=self.COLORS['bg_dark'])
-        self.root.attributes('-topmost', True)
+        
+        # Remove always-on-top behavior
+        self.root.attributes('-topmost', False)
+        
+        # Make window appear in taskbar
+        self.root.wm_withdraw()
+        self.root.wm_deiconify()
+        
+        # Optional: Minimize to system tray instead of taskbar
+        self.root.protocol("WM_DELETE_WINDOW", self.minimize_to_tray)
+        
+        # Add keyboard shortcut to toggle window visibility
+        self.root.bind('<Alt-h>', self.toggle_window)
+        
+        # Track window state
+        self.is_visible = True
 
         # Center window
         screen_width = self.root.winfo_screenwidth()
@@ -110,8 +125,30 @@ class VoiceAssistantGUI:
         # Configure tag for highlighting
         self.response_text.tag_configure('highlight', background=self.COLORS['highlight'])
 
+    def minimize_to_tray(self):
+        """Minimize window instead of closing"""
+        self.root.wm_withdraw()
+        self.is_visible = False
+    
+    def toggle_window(self, event=None):
+        """Toggle window visibility with Alt+H"""
+        if self.is_visible:
+            self.root.wm_withdraw()
+            self.is_visible = False
+        else:
+            self.root.wm_deiconify()
+            self.root.lift()
+            self.is_visible = True
+    
     def update_status(self, text: str, icon: str = "🔵") -> None:
-        self.status_label.config(text=f"{icon} {text}")
+        """Update status with visibility check"""
+        if hasattr(self, 'status_label'):
+            self.status_label.configure(text=f"{icon} {text}")
+            # Optionally flash taskbar on important status changes
+            if not self.is_visible and "command" in text.lower():
+                self.root.wm_deiconify()
+                self.root.lift()
+                self.is_visible = True
         self.root.update()
 
     def update_detected(self, text: Optional[str]) -> None:

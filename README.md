@@ -58,9 +58,17 @@ python main.py
 ```
 
 2. Wait for initialization and calibration
-3. Say the wake word ("helix")
-4. Ask your Windows-related question
-5. Listen to the AI-generated response
+
+3. Window Controls:
+   - Alt+H: Toggle window visibility
+   - Minimize: Hides to system tray
+   - Window appears automatically for important events
+
+The assistant will continue running in the background even when the window is hidden.
+
+4. Say the wake word ("helix")
+5. Ask your Windows-related question
+6. Listen to the AI-generated response
 
 ## Voice Commands
 
