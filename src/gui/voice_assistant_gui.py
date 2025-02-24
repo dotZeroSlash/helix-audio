@@ -4,78 +4,111 @@ from typing import Optional
 
 class VoiceAssistantGUI:
     def __init__(self):
+        # Color scheme
+        self.COLORS = {
+            'bg_dark': '#1E1E1E',
+            'bg_light': '#252526',
+            'accent': '#007ACC',
+            'text': '#D4D4D4',
+            'success': '#6A9955',
+            'highlight': '#264F78'
+        }
+
         self.root = tk.Tk()
-        self.root.title("Voice Assistant")
-        self.root.geometry("450x350")
-        self.root.configure(bg='#2E3440')
+        self.root.title("Helix Helper")
+        self.root.geometry("600x400")
+        self.root.configure(bg=self.COLORS['bg_dark'])
         self.root.attributes('-topmost', True)
 
-        # Center the window
+        # Center window
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        x = (screen_width - 450) // 2
-        y = (screen_height - 350) // 2
-        self.root.geometry(f"450x350+{x}+{y}")
+        x = (screen_width - 600) // 2
+        y = (screen_height - 400) // 2
+        self.root.geometry(f"600x400+{x}+{y}")
 
-        # Main frame with padding
-        self.frame = ttk.Frame(self.root, padding="10")
-        self.frame.pack(expand=True, fill='both', padx=20, pady=20)
+        # Configure style
+        style = ttk.Style()
+        style.configure('Custom.TFrame', background=self.COLORS['bg_dark'])
+        style.configure('Custom.TLabelframe', background=self.COLORS['bg_dark'])
+        style.configure('Custom.TLabelframe.Label', background=self.COLORS['bg_dark'], 
+                       foreground=self.COLORS['accent'])
 
-        # Header Section
+        # Main container
+        self.container = ttk.Frame(self.root, style='Custom.TFrame')
+        self.container.pack(expand=True, fill='both', padx=15, pady=15)
+
+        # Header
         self.header_label = tk.Label(
-            self.frame,
-            text="Voice Assistant Interface",
-            font=("Segoe UI", 14, "bold"),
-            bg='#2E3440',
-            fg='#88C0D0'
+            self.container,
+            text="Helix Helper",
+            font=("Segoe UI", 24, "bold"),
+            bg=self.COLORS['bg_dark'],
+            fg=self.COLORS['accent']
         )
-        self.header_label.pack(pady=(0, 15))
+        self.header_label.pack(pady=(0, 20))
 
-        # Status Section
+        # Status indicator
+        self.status_frame = tk.Frame(
+            self.container,
+            bg=self.COLORS['bg_light'],
+            relief='flat',
+            bd=1
+        )
+        self.status_frame.pack(fill='x', pady=(0, 15))
+        
         self.status_label = tk.Label(
-            self.frame,
+            self.status_frame,
             text="🔵 Listening for wake word...",
             font=("Segoe UI", 12),
-            wraplength=400,
-            bg='#3B4252',
-            fg='#E5E9F0',
-            relief=tk.SUNKEN,
-            padx=10,
-            pady=5
+            bg=self.COLORS['bg_light'],
+            fg=self.COLORS['text'],
+            pady=10
         )
-        self.status_label.pack(fill='x', pady=10)
+        self.status_label.pack(fill='x')
 
-        # Detected Text Section
+        # Detected text
         self.detected_label = tk.Label(
-            self.frame,
+            self.container,
             text="",
-            font=("Segoe UI", 10, "italic"),
-            wraplength=400,
-            bg='#2E3440',
-            fg='#A3BE8C'
+            font=("Segoe UI", 11, "italic"),
+            bg=self.COLORS['bg_dark'],
+            fg=self.COLORS['success'],
+            wraplength=550
         )
-        self.detected_label.pack(pady=10)
+        self.detected_label.pack(pady=(0, 15))
 
-        # Response Section
+        # Response area
         self.response_frame = ttk.LabelFrame(
-            self.frame,
-            text="Response",
-            padding="5"
+            self.container,
+            text=" Response ",
+            style='Custom.TLabelframe'
         )
-        self.response_frame.pack(fill='both', expand=True, pady=10)
+        self.response_frame.pack(fill='both', expand=True)
 
+        # Custom text widget with modern scrollbar
         self.response_text = tk.Text(
             self.response_frame,
-            height=10,
-            width=50,
-            font=("Segoe UI", 10),
+            font=("Segoe UI", 11),
             wrap=tk.WORD,
-            bg='#3B4252',
-            fg='#E5E9F0',
-            relief=tk.FLAT,
-            borderwidth=1
+            bg=self.COLORS['bg_light'],
+            fg=self.COLORS['text'],
+            relief='flat',
+            padx=10,
+            pady=10,
+            borderwidth=0,
+            insertbackground=self.COLORS['accent']  # Cursor color
         )
-        self.response_text.pack(fill='both', expand=True)
+        self.response_text.pack(side='left', fill='both', expand=True)
+
+        # Modern scrollbar
+        scrollbar = ttk.Scrollbar(self.response_frame, orient='vertical', 
+                                command=self.response_text.yview)
+        scrollbar.pack(side='right', fill='y')
+        self.response_text.configure(yscrollcommand=scrollbar.set)
+
+        # Configure tag for highlighting
+        self.response_text.tag_configure('highlight', background=self.COLORS['highlight'])
 
     def update_status(self, text: str, icon: str = "🔵") -> None:
         self.status_label.config(text=f"{icon} {text}")
