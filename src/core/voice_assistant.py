@@ -6,13 +6,21 @@ import sounddevice as sd # type: ignore
 from src.config.config import Config
 from src.core.audio_input import AudioInput
 from src.core.status_indicator import StatusIndicator
-from src.ai.ai_client import GeminiClient, OllamaClient
+from src.ai.ai_client import GeminiClient, OllamaClient, PerplexityClient
 
 class VoiceAssistant:
     def __init__(self, config: Config):
         self.config = config
         self.audio_input = AudioInput(config)
-        self.ai_client = GeminiClient(config) if config.use_gemini else OllamaClient(config)
+        
+        # Initialize the appropriate AI client based on configuration
+        if config.ai_provider == "gemini":
+            self.ai_client = GeminiClient(config)
+        elif config.ai_provider == "perplexity":
+            self.ai_client = PerplexityClient(config)
+        else:  # Default to Ollama
+            self.ai_client = OllamaClient(config)
+            
         self.status = StatusIndicator()
         self.pipeline = KPipeline(lang_code='a')
     

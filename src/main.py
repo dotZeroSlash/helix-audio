@@ -9,15 +9,28 @@ from src.config.config import Config
 from src.core.status_indicator import StatusIndicator
 from src.core.voice_assistant import VoiceAssistant
 import ollama # type: ignore
+import requests # type: ignore
 
 def initialize_ai_client(config: Config) -> bool:
     status = StatusIndicator()
     try:
-        print(f"\n⚙️| Initializing {'Gemini' if config.use_gemini else 'Ollama'}...")
-        if not config.use_gemini:
+        print(f"\n⚙️| Initializing {config.ai_provider.capitalize()} client...")
+        
+        if config.ai_provider == "ollama":
             ollama.pull(config.model_name)
-        status.ready()
-        return True
+            status.ready()
+            return True
+        elif config.ai_provider == "gemini" and not config.gemini_api_key:
+            status.error("Gemini API key not found in config.json")
+            return False
+        elif config.ai_provider == "perplexity" and not config.perplexity_api_key:
+            status.error("Perplexity API key not found in config.json")
+            return False
+        else:
+            # For Gemini and Perplexity with valid API keys
+            status.ready()
+            return True
+            
     except Exception as e:
         status.error(f"Error initializing AI client: {e}")
         print("Please check your configuration and try again.")
@@ -26,8 +39,12 @@ def initialize_ai_client(config: Config) -> bool:
 def main() -> int:
     config = Config.load()
     
-    if not config.gemini_api_key and config.use_gemini:
+    # Check for required API keys
+    if config.ai_provider == "gemini" and not config.gemini_api_key:
         print("❌| Gemini API key not found in config.json")
+        return 1
+    elif config.ai_provider == "perplexity" and not config.perplexity_api_key:
+        print("❌| Perplexity API key not found in config.json")
         return 1
     
     StatusIndicator.initialize_gui()

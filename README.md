@@ -1,12 +1,13 @@
 # Windows Voice Assistant
 
-A voice-activated assistant that provides Windows system information using AI-powered responses. The assistant supports both local (Ollama) and cloud-based (Google Gemini) AI models for generating responses.
+A voice-activated assistant that provides Windows system information using AI-powered responses. The assistant supports multiple AI backends including local (Ollama) and cloud-based (Google Gemini, Perplexity) models for generating responses.
 
 ## Features
 
 - 🎤 Voice activation with customizable wake word (default: "helix")
-- 🤖 Dual AI backend support:
+- 🤖 Multiple AI backend support:
   - Google Gemini API
+  - Perplexity API
   - Local Ollama model
 - 🎯 Windows-specific system information and troubleshooting
 - 🔊 Text-to-speech response output
@@ -17,7 +18,7 @@ A voice-activated assistant that provides Windows system information using AI-po
 
 - Python 3.8+
 - Microphone access
-- Internet connection (for Gemini API)
+- Internet connection (for cloud APIs)
 - Ollama installed (if using local model)
 
 ## Installation
@@ -30,24 +31,35 @@ cd [repository-name]
 
 2. Install required packages:
 ```bash
-pip install speech_recognition ollama google-generativeai sounddevice numpy kokoro
+pip install speech_recognition ollama google-generativeai sounddevice numpy kokoro requests
 ```
 
 3. Configure the application:
-- For Gemini API: Add your API key in `Config` class
+- Create a config.json file with your API keys
 - For Ollama: Ensure Ollama is installed and running
 
 ## Configuration
 
-Edit the `Config` class in `main.py` to customize:
+Create a `config.json` file in the root directory:
+
+```json
+{
+  "ai_provider": "ollama",  // Options: "ollama", "gemini", "perplexity"
+  "gemini_api_key": "your-gemini-api-key",
+  "perplexity_api_key": "your-perplexity-api-key"
+}
+```
+
+Or edit the `Config` class in `src/config/config.py` to customize:
 
 ```python
 @dataclass(frozen=True)
 class Config:
     wake_word: str = "helix"              # Customize wake word
-    use_gemini: bool = True               # Toggle between Gemini/Ollama
-    gemini_api_key: str = "your-api-key"  # Your Gemini API key
-    model_name: str = "llama2:latest"     # Ollama model name
+    ai_provider: str = "ollama"           # Choose AI provider: "ollama", "gemini", "perplexity"
+    gemini_api_key: str = ""              # Your Gemini API key
+    perplexity_api_key: str = ""          # Your Perplexity API key
+    model_name: str = "llama3.2:latest"   # Ollama model name
 ```
 
 ## Usage

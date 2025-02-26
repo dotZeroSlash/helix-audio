@@ -13,5 +13,6 @@ setup(
         "kokoro",
         "webrtcvad",
         "pyaudio",
+        "requests",
     ],
 )

@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Dict
 import google.generativeai as genai # type: ignore
 import ollama # type: ignore
+import requests # type: ignore
+import json
 from src.config.config import Config
 from src.core.status_indicator import StatusIndicator
 
@@ -55,3 +57,50 @@ class GeminiClient(AIClient):
                     return f"Error after {self.config.max_retries} attempts: {e}"
                 continue
         return "Failed to get response"
+
+class PerplexityClient(AIClient):
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.api_key = config.perplexity_api_key
+        self.model = config.perplexity_model
+        self.api_url = "https://api.perplexity.ai/chat/completions"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        self.messages = [{"role": "system", "content": config.system_prompt}]
+    
+    def query(self, prompt: str) -> str:
+        self.status.processing()
+        self.messages.append({"role": "user", "content": prompt})
+        
+        for attempt in range(self.config.max_retries):
+            try:
+                payload = {
+                    "model": self.model,
+                    "messages": self.messages,
+                    "temperature": 0.7,
+                    "max_tokens": 1024
+                }
+                
+                response = requests.post(
+                    self.api_url,
+                    headers=self.headers,
+                    data=json.dumps(payload)
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    content = result["choices"][0]["message"]["content"]
+                    self.messages.append({"role": "assistant", "content": content})
+                    return content
+                else:
+                    if attempt == self.config.max_retries - 1:
+                        return f"Error: API returned status code {response.status_code}"
+                    continue
+            except Exception as e:
+                if attempt == self.config.max_retries - 1:
+                    return f"Error after {self.config.max_retries} attempts: {e}"
+                continue
+        
+        return "Failed to get response from Perplexity API"
